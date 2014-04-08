@@ -8,7 +8,11 @@ public class Driver {
 	
 	public static void main(String[] args) {
 		
-		Graph graph = Utilities.createRandomGraph(5, 10);
+		Graph graph = Utilities.createRandomGraph(4, 3);
+		
+		LPColor lpcolor = new LPColor(graph);
+		lpcolor.color();
+		
 		Visualizer vis = new Visualizer(graph, 500, 500);
 		vis.showStructure();
 		
