@@ -8,7 +8,7 @@ public class Driver {
 	
 	public static void main(String[] args) {
 		
-		Graph graph = Utilities.createRandomGraph(4, 3);
+		Graph graph = Utilities.createRandomGraph(4, 4);
 		
 		LPColor lpcolor = new LPColor(graph);
 		lpcolor.color();
