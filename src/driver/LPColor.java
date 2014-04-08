@@ -15,6 +15,7 @@ public class LPColor {
 	
 	Graph graph;
 	List<Color> colors = new ArrayList<Color>();
+	int colorsRequired = 0;
 	
 	public LPColor(Graph graph) {
 		this.graph = graph;
@@ -61,18 +62,18 @@ public class LPColor {
 	    /* create space large enough for one row */
 	    int[] colno = new int[Ncol];
 	    double[] row = new double[Ncol];
-	
+	    
 	    lp = LpSolve.makeLp(0, Ncol);
 	    if (lp.getLp() == 0) {
 	    	System.out.println("ERROR: couldn't construct a new model...");
 	    	return 1;
 	    }
-	
 	    
     	/* let us name our variables. Not required, but can be useful for debugging */
 	    for (Node node : graph.getVertices()) {
 	    	for (int i = 0; i < colors.size(); i++) {
 	    		lp.setColName(getIndex(node, i), "x_"+node+","+i);
+	    		lp.setBinary(getIndex(node, i), true);
 	    	}
 	    }
 	    for (int i = 0; i < colors.size(); i++) {
@@ -81,7 +82,7 @@ public class LPColor {
 
     	lp.setAddRowmode(true);  /* makes building the model faster if it is done rows by row */
 
-    	// force all vertices to have a color
+    	// force all vertices to have a single color
     	for (Node node : graph.getVertices()) {
     		
 	    	j = 0;
@@ -89,7 +90,6 @@ public class LPColor {
 	    		colno[j] = getIndex(node, n); // first column
 	    		row[j++] = 1;
 	    	}
-	
 	    	// add the row to lpsolve
 	    	lp.addConstraintex(j, row, colno, LpSolve.EQ, 1);
     	}
@@ -177,9 +177,6 @@ public class LPColor {
 	
     	/* a solution is calculated, now lets get some results */
 
-    	/* objective value */
-    	System.out.println("Objective value: " + lp.getObjective());
-
     	/* variable values */
     	lp.getVariables(row);
     	for(j = 0; j < Ncol; j++) {
@@ -191,12 +188,14 @@ public class LPColor {
 	    	for (int n = 0; n < colors.size(); n++) {
 	    		j = getIndex(node, n) - 1;
 	    		if (row[j] >  0) {
-	    			System.out.println("row["+j+"]   "+lp.getColName(j + 1)+"     "+node+","+n);
-	    			//System.out.println("COLOR: "+n);
+	    			//System.out.println(lp.getColName(j + 1)+"     "+node+","+n+"      = "+row[j]);
 	    			node.setColor(colors.get(n));
 	    		}
 	    	}
     	}
+    	
+    	colorsRequired = (int)Math.round(lp.getObjective());
+    	System.out.println("COLORS REQUIRED: "+colorsRequired);
 	
 	    /* clean up such that all used memory by lpsolve is freed */
 	    if(lp.getLp() != 0)
